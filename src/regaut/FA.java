@@ -394,16 +394,23 @@ public class FA implements Cloneable {
         return product(f, new DifferenceAcceptStrategyImpl());
     }
 
-
+    /**
+     * Method for setting up the the product of two FA and based on the accept stategy
+     * set accept states correctly, always builds all transactions from the new states
+     * @param other the FA which should be used for the product creation
+     * @param acceptStrategy strategy choosen for the accept state check
+     * @return the product FA with the used accept strategy used
+     */
     private FA product(FA other, AcceptStrategy acceptStrategy){
         FA result = new FA();
         if(!this.alphabet.equals(other.alphabet)){
             throw new IllegalArgumentException("Not the same alphabet");
         }
         result.alphabet = this.alphabet;
+        // Used for transactions
         Map<StatePair, State> pairedStates = new HashMap<>();
 
-
+        //Create all the new states and set the accept states
         for(State thisState : this.states){
             for(State otherState : other.states){
                 State pairState = new State("(" + thisState.name + "." + otherState.name + ")");
@@ -413,6 +420,7 @@ public class FA implements Cloneable {
             }
         }
 
+        // Build the transactions between all the new states
         for(StatePair pair : pairedStates.keySet()){
             for(Character c : this.alphabet.symbols){
                 StateSymbolPair from = new StateSymbolPair(pairedStates.get(pair), c);
@@ -421,6 +429,7 @@ public class FA implements Cloneable {
             }
         }
 
+        // Set the initial state for the result FA
         result.initial = pairedStates.get(new StatePair(this.initial, other.initial));
         return result;
     }

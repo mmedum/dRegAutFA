@@ -3,9 +3,6 @@ package regaut.strategies;
 import regaut.FA;
 import regaut.State;
 
-/**
- * Created by mark on 4/29/15.
- */
 public class UnionAcceptStrategyImpl implements AcceptStrategy {
 
     @Override

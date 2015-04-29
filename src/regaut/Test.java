@@ -1,8 +1,8 @@
 package regaut;
 
-public class Test
-{
-    public static FA test(){
+public class Test {
+
+    public static void main(String[] args){
         Alphabet alphabet = new Alphabet('0','1');
 
         FA m1 = new FA();
@@ -40,11 +40,6 @@ public class Test
         m2.transitions.put(new StateSymbolPair(r,'1'),s);
         m2.transitions.put(new StateSymbolPair(s,'0'),r);
         m2.transitions.put(new StateSymbolPair(s, '1'), r);
-
-        return m1.intersection(m2);
-    }
-
-    public static void main(String[] args){
-        System.out.println(test().toDot());
+        System.out.println(m1.intersection(m2).toDot());
     }
 }
