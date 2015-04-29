@@ -1,5 +1,10 @@
 package regaut;
 
+import regaut.strategies.AcceptStrategy;
+import regaut.strategies.DifferenceAcceptStrategyImpl;
+import regaut.strategies.IntersectionAcceptStrategyImpl;
+import regaut.strategies.UnionAcceptStrategyImpl;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -365,7 +370,7 @@ public class FA implements Cloneable {
      * @exception IllegalArgumentException if the alphabets of <tt>f</tt> and this automaton are not the same
      */
     public FA intersection(FA f) throws IllegalArgumentException {
-        throw new UnsupportedOperationException("method not implemented yet!");
+        return product(f, new IntersectionAcceptStrategyImpl());
     }
     
     /**
@@ -376,7 +381,7 @@ public class FA implements Cloneable {
      * @see NFA#union
      */
     public FA union(FA f) throws IllegalArgumentException {
-        throw new UnsupportedOperationException("method not implemented yet!");
+        return product(f, new UnionAcceptStrategyImpl());
     }
     
     /**
@@ -386,6 +391,37 @@ public class FA implements Cloneable {
      * @exception IllegalArgumentException if the alphabets of <tt>f</tt> and this automaton are not the same
      */
     public FA minus(FA f) throws IllegalArgumentException {
-        throw new UnsupportedOperationException("method not implemented yet!");
+        return product(f, new DifferenceAcceptStrategyImpl());
+    }
+
+
+    private FA product(FA other, AcceptStrategy acceptStrategy){
+        FA result = new FA();
+        if(!this.alphabet.equals(other.alphabet)){
+            throw new IllegalArgumentException("Not the same alphabet");
+        }
+        result.alphabet = this.alphabet;
+        Map<StatePair, State> pairedStates = new HashMap<>();
+
+
+        for(State thisState : this.states){
+            for(State otherState : other.states){
+                State pairState = new State("(" + thisState.name + "." + otherState.name + ")");
+                result.states.add(pairState);
+                pairedStates.put(new StatePair(thisState, otherState), pairState);
+                acceptStrategy.setAcceptNodes(this, other, thisState, otherState, pairState, result);
+            }
+        }
+
+        for(StatePair pair : pairedStates.keySet()){
+            for(Character c : this.alphabet.symbols){
+                StateSymbolPair from = new StateSymbolPair(pairedStates.get(pair), c);
+                State to = pairedStates.get(new StatePair(this.delta(pair.s1, c), other.delta(pair.s2, c)));
+                result.transitions.put(from, to);
+            }
+        }
+
+        result.initial = pairedStates.get(new StatePair(this.initial, other.initial));
+        return result;
     }
 }
